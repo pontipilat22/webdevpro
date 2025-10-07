@@ -6,10 +6,67 @@ document.addEventListener('DOMContentLoaded', () => {
     initSmoothScroll();
     initMobileMenu();
     initTypingEffect();
+
+    // Автообновление при изменениях в LocalStorage (из админки)
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'webdev_prices' || e.key === 'webdev_portfolio') {
+            console.log('Данные обновлены из админ-панели, перезагружаем...');
+            loadDynamicData();
+        }
+    });
 });
+
+// Инициализация данных по умолчанию (если их нет)
+function initializeDefaultData() {
+    if (!localStorage.getItem('webdev_prices')) {
+        const defaultPrices = {
+            landing: { price: 50000, duration: '5-7 дней' },
+            corporate: { price: 150000, duration: '14-21 день' },
+            ecommerce: { price: 250000, duration: '30-45 дней' }
+        };
+        localStorage.setItem('webdev_prices', JSON.stringify(defaultPrices));
+    }
+
+    if (!localStorage.getItem('webdev_portfolio')) {
+        const defaultPortfolio = [
+            {
+                id: 1,
+                title: 'Интернет-магазин одежды',
+                description: 'Полнофункциональный магазин с каталогом, фильтрами и онлайн-оплатой',
+                category: 'E-commerce',
+                tags: ['React', 'Node.js', 'MongoDB'],
+                gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                url: ''
+            },
+            {
+                id: 2,
+                title: 'Лендинг для стартапа',
+                description: 'Яркий продающий лендинг с анимациями и интеграцией CRM',
+                category: 'Landing',
+                tags: ['HTML/CSS', 'JavaScript', 'GSAP'],
+                gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                url: ''
+            },
+            {
+                id: 3,
+                title: 'Корпоративный сайт',
+                description: 'Представительский сайт компании с блогом и формами обратной связи',
+                category: 'Corporate',
+                tags: ['WordPress', 'PHP', 'MySQL'],
+                gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                url: ''
+            }
+        ];
+        localStorage.setItem('webdev_portfolio', JSON.stringify(defaultPortfolio));
+    }
+}
 
 // Загрузка динамических данных из LocalStorage
 function loadDynamicData() {
+    // Сначала инициализируем данные если их нет
+    initializeDefaultData();
+
+    // Затем загружаем
     loadPrices();
     loadPortfolio();
 }
