@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(del index.html styles.css script.js)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
