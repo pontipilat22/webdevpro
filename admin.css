@@ -274,6 +274,35 @@
     margin-bottom: 12px;
 }
 
+.project-card-url {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+}
+
+.project-card-url svg {
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.project-card-url a {
+    color: var(--color-primary-light);
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.project-card-url a:hover {
+    text-decoration: underline;
+}
+
 .project-card-tags {
     display: flex;
     flex-wrap: wrap;

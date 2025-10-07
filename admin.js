@@ -23,7 +23,8 @@ class DataManager {
                     description: 'Полнофункциональный магазин с каталогом, фильтрами и онлайн-оплатой',
                     category: 'E-commerce',
                     tags: ['React', 'Node.js', 'MongoDB'],
-                    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    url: ''
                 },
                 {
                     id: 2,
@@ -31,7 +32,8 @@ class DataManager {
                     description: 'Яркий продающий лендинг с анимациями и интеграцией CRM',
                     category: 'Landing',
                     tags: ['HTML/CSS', 'JavaScript', 'GSAP'],
-                    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+                    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                    url: ''
                 },
                 {
                     id: 3,
@@ -39,7 +41,8 @@ class DataManager {
                     description: 'Представительский сайт компании с блогом и формами обратной связи',
                     category: 'Corporate',
                     tags: ['WordPress', 'PHP', 'MySQL'],
-                    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+                    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                    url: ''
                 }
             ];
             localStorage.setItem('webdev_portfolio', JSON.stringify(defaultPortfolio));
@@ -273,6 +276,13 @@ function createProjectCard(project) {
         <div class="project-card-content">
             <h4>${project.title}</h4>
             <p>${project.description}</p>
+            ${project.url ? `<div class="project-card-url">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+                <a href="${project.url}" target="_blank">${project.url}</a>
+            </div>` : ''}
             <div class="project-card-tags">
                 ${tagsHTML}
             </div>
@@ -341,7 +351,8 @@ projectForm.addEventListener('submit', (e) => {
         description: document.getElementById('projectDescription').value,
         category: document.getElementById('projectCategory').value,
         tags: document.getElementById('projectTags').value.split(',').map(t => t.trim()),
-        gradient: document.getElementById('projectGradient').value
+        gradient: document.getElementById('projectGradient').value,
+        url: document.getElementById('projectUrl').value
     };
 
     if (editingProjectId) {
@@ -370,6 +381,7 @@ function editProject(id) {
         document.getElementById('projectCategory').value = project.category;
         document.getElementById('projectTags').value = project.tags.join(', ');
         document.getElementById('projectGradient').value = project.gradient;
+        document.getElementById('projectUrl').value = project.url || '';
 
         modal.classList.add('active');
     }

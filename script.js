@@ -77,13 +77,48 @@ function loadPortfolio() {
         const portfolioItem = document.createElement('div');
         portfolioItem.className = 'portfolio-item';
 
+        // Если есть URL, делаем карточку кликабельной
+        if (project.url) {
+            portfolioItem.style.cursor = 'pointer';
+            portfolioItem.addEventListener('click', () => {
+                window.open(project.url, '_blank');
+            });
+        }
+
         const tagsHTML = project.tags.map(tag => `<span>${tag}</span>`).join('');
 
-        portfolioItem.innerHTML = `
-            <div class="portfolio-image">
+        // Определяем контент для предпросмотра
+        let imageContent;
+        if (project.url) {
+            // Если есть URL, показываем iframe
+            imageContent = `
+                <div class="portfolio-iframe-wrapper">
+                    <iframe src="${project.url}" frameborder="0" scrolling="no" loading="lazy"></iframe>
+                    <div class="portfolio-overlay">
+                        <span class="portfolio-category">${project.category}</span>
+                        <button class="portfolio-view-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                <polyline points="15 3 21 3 21 9"/>
+                                <line x1="10" y1="14" x2="21" y2="3"/>
+                            </svg>
+                            Открыть сайт
+                        </button>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Если нет URL, показываем градиент
+            imageContent = `
                 <div class="portfolio-placeholder" style="background: ${project.gradient};">
                     <span>${project.category}</span>
                 </div>
+            `;
+        }
+
+        portfolioItem.innerHTML = `
+            <div class="portfolio-image">
+                ${imageContent}
             </div>
             <div class="portfolio-content">
                 <h3>${project.title}</h3>
