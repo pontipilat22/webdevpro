@@ -120,6 +120,75 @@ app.post('/api/portfolio', (req, res) => {
     }
 });
 
+// Получить заявки
+app.get('/api/orders', (req, res) => {
+    try {
+        const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+        res.json(data.orders || []);
+    } catch (error) {
+        console.error('Error reading orders:', error);
+        res.status(500).json({ error: 'Failed to read orders' });
+    }
+});
+
+// Добавить заявку
+app.post('/api/orders', (req, res) => {
+    try {
+        const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+        if (!data.orders) {
+            data.orders = [];
+        }
+
+        const newOrder = {
+            id: Date.now(),
+            ...req.body,
+            status: 'new',
+            createdAt: new Date().toISOString()
+        };
+
+        data.orders.unshift(newOrder); // Добавляем в начало массива
+        fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+        res.json({ success: true, order: newOrder });
+    } catch (error) {
+        console.error('Error creating order:', error);
+        res.status(500).json({ error: 'Failed to create order' });
+    }
+});
+
+// Обновить статус заявки
+app.patch('/api/orders/:id', (req, res) => {
+    try {
+        const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+        const orderId = parseInt(req.params.id);
+        const orderIndex = data.orders.findIndex(o => o.id === orderId);
+
+        if (orderIndex !== -1) {
+            data.orders[orderIndex] = { ...data.orders[orderIndex], ...req.body };
+            fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+            res.json({ success: true, order: data.orders[orderIndex] });
+        } else {
+            res.status(404).json({ error: 'Order not found' });
+        }
+    } catch (error) {
+        console.error('Error updating order:', error);
+        res.status(500).json({ error: 'Failed to update order' });
+    }
+});
+
+// Удалить заявку
+app.delete('/api/orders/:id', (req, res) => {
+    try {
+        const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+        const orderId = parseInt(req.params.id);
+        data.orders = data.orders.filter(o => o.id !== orderId);
+        fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        res.status(500).json({ error: 'Failed to delete order' });
+    }
+});
+
 // Сброс к данным по умолчанию
 app.post('/api/reset', (req, res) => {
     try {

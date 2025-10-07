@@ -416,6 +416,66 @@
         </div>
     </section>
 
+    <!-- Форма заявки -->
+    <section class="order-form fade-in" id="order">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Оставить заявку</h2>
+                <p class="section-subtitle">Заполните форму и я свяжусь с вами в ближайшее время</p>
+            </div>
+            <div class="order-form-wrapper">
+                <form class="contact-form" id="orderForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clientName">Ваше имя <span class="required">*</span></label>
+                            <input type="text" id="clientName" name="name" placeholder="Иван Иванов" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="clientType">Вы представляете <span class="required">*</span></label>
+                            <select id="clientType" name="clientType" required>
+                                <option value="">Выберите...</option>
+                                <option value="company">Компанию</option>
+                                <option value="individual">Физическое лицо</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clientPhone">Телефон <span class="required">*</span></label>
+                            <input type="tel" id="clientPhone" name="phone" placeholder="+7 (777) 123-45-67" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="clientEmail">E-mail</label>
+                            <input type="email" id="clientEmail" name="email" placeholder="example@mail.com">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="projectName">Что нужно <span class="required">*</span></label>
+                        <input type="text" id="projectName" name="projectName" placeholder="Например: Лендинг для автосервиса" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="projectDescription">Опишите, каким вы видите сайт <span class="required">*</span></label>
+                        <textarea id="projectDescription" name="description" rows="5" placeholder="Расскажите о своих пожеланиях: какие функции нужны, какой стиль, примеры сайтов, которые нравятся..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="telegramContact" name="telegram">
+                            <span class="checkbox-custom"></span>
+                            <span>Хочу, чтобы мне ответили в Telegram</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"/>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                        Отправить заявку
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
     <!-- Футер -->
     <footer class="footer">
         <div class="container">

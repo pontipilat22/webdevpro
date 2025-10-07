@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSmoothScroll();
     initMobileMenu();
     initTypingEffect();
+    initOrderForm();
 });
 
 // Загрузка динамических данных с API
@@ -371,6 +372,100 @@ window.addEventListener('load', () => {
         }
     });
 });
+
+// Инициализация формы заявки
+function initOrderForm() {
+    const orderForm = document.getElementById('orderForm');
+
+    if (!orderForm) return;
+
+    orderForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Собираем данные формы
+        const formData = {
+            name: document.getElementById('clientName').value,
+            phone: document.getElementById('clientPhone').value,
+            email: document.getElementById('clientEmail').value || '',
+            clientType: document.getElementById('clientType').value,
+            projectName: document.getElementById('projectName').value,
+            description: document.getElementById('projectDescription').value,
+            telegram: document.getElementById('telegramContact').checked
+        };
+
+        // Отправляем на сервер
+        try {
+            const submitButton = orderForm.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Отправка...';
+
+            const response = await fetch(`${API_URL}/orders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Показываем успешное сообщение
+                showNotification('Заявка успешно отправлена! Я свяжусь с вами в ближайшее время.', 'success');
+
+                // Очищаем форму
+                orderForm.reset();
+            } else {
+                throw new Error('Failed to submit order');
+            }
+
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalText;
+        } catch (error) {
+            console.error('Error submitting order:', error);
+            showNotification('Произошла ошибка при отправке заявки. Попробуйте позже или свяжитесь со мной напрямую.', 'error');
+
+            const submitButton = orderForm.querySelector('button[type="submit"]');
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Отправить заявку';
+        }
+    });
+}
+
+// Показать уведомление
+function showNotification(message, type = 'info') {
+    // Создаем контейнер для уведомлений если его нет
+    let container = document.getElementById('notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notification-container';
+        container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;';
+        document.body.appendChild(container);
+    }
+
+    // Создаем уведомление
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        min-width: 300px;
+        max-width: 500px;
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+
+    container.appendChild(notification);
+
+    // Автоматически удаляем через 5 секунд
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 5000);
+}
 
 console.log('WebDev Pro website with API initialized! 🚀');
 console.log('Ready to create amazing websites! 💻');

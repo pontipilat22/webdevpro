@@ -94,6 +94,45 @@ class DataManager {
         await this.savePortfolio(filtered);
     }
 
+    // Получить заявки
+    async getOrders() {
+        try {
+            const response = await fetch(`${API_URL}/orders`);
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+            return [];
+        }
+    }
+
+    // Обновить статус заявки
+    async updateOrder(id, data) {
+        try {
+            const response = await fetch(`${API_URL}/orders/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error updating order:', error);
+            throw error;
+        }
+    }
+
+    // Удалить заявку
+    async deleteOrder(id) {
+        try {
+            const response = await fetch(`${API_URL}/orders/${id}`, {
+                method: 'DELETE'
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            throw error;
+        }
+    }
+
     // Сброс к данным по умолчанию
     async resetToDefaults() {
         try {
@@ -201,7 +240,8 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
 
         const titles = {
             'prices': 'Управление ценами',
-            'portfolio': 'Управление портфолио'
+            'portfolio': 'Управление портфолио',
+            'orders': 'Заявки клиентов'
         };
         document.getElementById('sectionTitle').textContent = titles[section];
     });
@@ -211,6 +251,7 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
 async function loadAllData() {
     await loadPrices();
     await loadPortfolio();
+    await loadOrders();
 }
 
 // Загрузка и обработка цен
@@ -412,5 +453,157 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
         }
     }
 });
+
+// Загрузка заявок
+async function loadOrders() {
+    const orders = await dataManager.getOrders();
+    const container = document.getElementById('ordersContainer');
+
+    if (!container) return;
+
+    if (orders.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+                <h3>Пока нет заявок</h3>
+                <p>Новые заявки от клиентов будут отображаться здесь</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = '';
+
+    orders.forEach(order => {
+        const orderCard = createOrderCard(order);
+        container.appendChild(orderCard);
+    });
+}
+
+// Создание карточки заявки
+function createOrderCard(order) {
+    const card = document.createElement('div');
+    card.className = 'order-card';
+
+    const date = new Date(order.createdAt);
+    const formattedDate = date.toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    const statusBadge = getStatusBadge(order.status);
+    const clientTypeBadge = order.clientType === 'company' ? 'Компания' : 'Физ. лицо';
+
+    card.innerHTML = `
+        <div class="order-card-header">
+            <div class="order-card-title">
+                <h4>${order.name}</h4>
+                ${statusBadge}
+            </div>
+            <div class="order-card-date">${formattedDate}</div>
+        </div>
+        <div class="order-card-body">
+            <div class="order-info-grid">
+                <div class="order-info-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                    <span>${order.phone}</span>
+                </div>
+                ${order.email ? `
+                <div class="order-info-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                    <span>${order.email}</span>
+                </div>
+                ` : ''}
+                <div class="order-info-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    <span>${clientTypeBadge}</span>
+                </div>
+                ${order.telegram ? `
+                <div class="order-info-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                    </svg>
+                    <span>Связаться в Telegram</span>
+                </div>
+                ` : ''}
+            </div>
+            <div class="order-project">
+                <strong>Проект:</strong> ${order.projectName}
+            </div>
+            <div class="order-description">
+                <strong>Описание:</strong>
+                <p>${order.description}</p>
+            </div>
+        </div>
+        <div class="order-card-actions">
+            <select class="order-status-select" data-order-id="${order.id}">
+                <option value="new" ${order.status === 'new' ? 'selected' : ''}>Новая</option>
+                <option value="in_progress" ${order.status === 'in_progress' ? 'selected' : ''}>В работе</option>
+                <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Завершена</option>
+            </select>
+            <button class="btn btn-outline btn-delete-order" data-id="${order.id}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                Удалить
+            </button>
+        </div>
+    `;
+
+    // Обработчик изменения статуса
+    const statusSelect = card.querySelector('.order-status-select');
+    statusSelect.addEventListener('change', async (e) => {
+        try {
+            await dataManager.updateOrder(order.id, { status: e.target.value });
+            notificationManager.success('Статус заявки обновлён');
+            await loadOrders();
+        } catch (error) {
+            notificationManager.error('Ошибка при обновлении статуса');
+        }
+    });
+
+    // Обработчик удаления
+    const deleteBtn = card.querySelector('.btn-delete-order');
+    deleteBtn.addEventListener('click', async () => {
+        if (confirm('Вы уверены, что хотите удалить эту заявку?')) {
+            try {
+                await dataManager.deleteOrder(order.id);
+                await loadOrders();
+                notificationManager.success('Заявка удалена');
+            } catch (error) {
+                notificationManager.error('Ошибка при удалении заявки');
+            }
+        }
+    });
+
+    return card;
+}
+
+// Получить бадж статуса
+function getStatusBadge(status) {
+    const badges = {
+        'new': '<span class="status-badge status-new">Новая</span>',
+        'in_progress': '<span class="status-badge status-progress">В работе</span>',
+        'completed': '<span class="status-badge status-completed">Завершена</span>'
+    };
+    return badges[status] || badges['new'];
+}
 
 console.log('Admin panel with API initialized! 🔧');
