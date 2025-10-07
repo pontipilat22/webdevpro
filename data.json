@@ -1,0 +1,57 @@
+{
+  "prices": {
+    "landing": {
+      "price": 50000,
+      "duration": "5-7 дней"
+    },
+    "corporate": {
+      "price": 150000,
+      "duration": "14-21 день"
+    },
+    "ecommerce": {
+      "price": 250000,
+      "duration": "30-45 дней"
+    }
+  },
+  "portfolio": [
+    {
+      "id": 1,
+      "title": "Интернет-магазин одежды",
+      "description": "Полнофункциональный магазин с каталогом, фильтрами и онлайн-оплатой",
+      "category": "E-commerce",
+      "tags": [
+        "React",
+        "Node.js",
+        "MongoDB"
+      ],
+      "gradient": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      "url": ""
+    },
+    {
+      "id": 2,
+      "title": "Лендинг для стартапа",
+      "description": "Яркий продающий лендинг с анимациями и интеграцией CRM",
+      "category": "Landing",
+      "tags": [
+        "HTML/CSS",
+        "JavaScript",
+        "GSAP"
+      ],
+      "gradient": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+      "url": ""
+    },
+    {
+      "id": 3,
+      "title": "Корпоративный сайт",
+      "description": "Представительский сайт компании с блогом и формами обратной связи",
+      "category": "Corporate",
+      "tags": [
+        "WordPress",
+        "PHP",
+        "MySQL"
+      ],
+      "gradient": "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+      "url": ""
+    }
+  ]
+}

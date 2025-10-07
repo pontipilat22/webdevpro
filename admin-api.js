@@ -1,114 +1,111 @@
-// Класс для работы с данными
+// API URL (автоматически определяется)
+const API_URL = window.location.origin + '/api';
+
+// Класс для работы с данными через API
 class DataManager {
     constructor() {
-        this.initializeDefaultData();
-    }
-
-    // Инициализация данных по умолчанию
-    initializeDefaultData() {
-        if (!localStorage.getItem('webdev_prices')) {
-            const defaultPrices = {
-                landing: { price: 50000, duration: '5-7 дней' },
-                corporate: { price: 150000, duration: '14-21 день' },
-                ecommerce: { price: 250000, duration: '30-45 дней' }
-            };
-            localStorage.setItem('webdev_prices', JSON.stringify(defaultPrices));
-        }
-
-        if (!localStorage.getItem('webdev_portfolio')) {
-            const defaultPortfolio = [
-                {
-                    id: 1,
-                    title: 'Интернет-магазин одежды',
-                    description: 'Полнофункциональный магазин с каталогом, фильтрами и онлайн-оплатой',
-                    category: 'E-commerce',
-                    tags: ['React', 'Node.js', 'MongoDB'],
-                    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    url: ''
-                },
-                {
-                    id: 2,
-                    title: 'Лендинг для стартапа',
-                    description: 'Яркий продающий лендинг с анимациями и интеграцией CRM',
-                    category: 'Landing',
-                    tags: ['HTML/CSS', 'JavaScript', 'GSAP'],
-                    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                    url: ''
-                },
-                {
-                    id: 3,
-                    title: 'Корпоративный сайт',
-                    description: 'Представительский сайт компании с блогом и формами обратной связи',
-                    category: 'Corporate',
-                    tags: ['WordPress', 'PHP', 'MySQL'],
-                    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                    url: ''
-                }
-            ];
-            localStorage.setItem('webdev_portfolio', JSON.stringify(defaultPortfolio));
-        }
+        // Данные загружаются с сервера
     }
 
     // Получить цены
-    getPrices() {
-        return JSON.parse(localStorage.getItem('webdev_prices'));
+    async getPrices() {
+        try {
+            const response = await fetch(`${API_URL}/prices`);
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching prices:', error);
+            return {};
+        }
     }
 
     // Сохранить цены
-    savePrices(prices) {
-        localStorage.setItem('webdev_prices', JSON.stringify(prices));
+    async savePrices(prices) {
+        try {
+            const response = await fetch(`${API_URL}/prices`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(prices)
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error saving prices:', error);
+            throw error;
+        }
     }
 
     // Обновить цену
-    updatePrice(priceId, data) {
-        const prices = this.getPrices();
+    async updatePrice(priceId, data) {
+        const prices = await this.getPrices();
         prices[priceId] = data;
-        this.savePrices(prices);
+        await this.savePrices(prices);
     }
 
     // Получить портфолио
-    getPortfolio() {
-        return JSON.parse(localStorage.getItem('webdev_portfolio'));
+    async getPortfolio() {
+        try {
+            const response = await fetch(`${API_URL}/portfolio`);
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching portfolio:', error);
+            return [];
+        }
     }
 
     // Сохранить портфолио
-    savePortfolio(portfolio) {
-        localStorage.setItem('webdev_portfolio', JSON.stringify(portfolio));
+    async savePortfolio(portfolio) {
+        try {
+            const response = await fetch(`${API_URL}/portfolio`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(portfolio)
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error saving portfolio:', error);
+            throw error;
+        }
     }
 
     // Добавить проект
-    addProject(project) {
-        const portfolio = this.getPortfolio();
+    async addProject(project) {
+        const portfolio = await this.getPortfolio();
         project.id = Date.now();
         portfolio.push(project);
-        this.savePortfolio(portfolio);
+        await this.savePortfolio(portfolio);
         return project;
     }
 
     // Обновить проект
-    updateProject(id, updatedProject) {
-        const portfolio = this.getPortfolio();
+    async updateProject(id, updatedProject) {
+        const portfolio = await this.getPortfolio();
         const index = portfolio.findIndex(p => p.id === id);
         if (index !== -1) {
             portfolio[index] = { ...portfolio[index], ...updatedProject };
-            this.savePortfolio(portfolio);
+            await this.savePortfolio(portfolio);
             return portfolio[index];
         }
         return null;
     }
 
     // Удалить проект
-    deleteProject(id) {
-        const portfolio = this.getPortfolio();
+    async deleteProject(id) {
+        const portfolio = await this.getPortfolio();
         const filtered = portfolio.filter(p => p.id !== id);
-        this.savePortfolio(filtered);
+        await this.savePortfolio(filtered);
     }
 
     // Сброс к данным по умолчанию
-    resetToDefaults() {
-        localStorage.removeItem('webdev_prices');
-        localStorage.removeItem('webdev_portfolio');
-        this.initializeDefaultData();
+    async resetToDefaults() {
+        try {
+            const response = await fetch(`${API_URL}/reset`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error resetting data:', error);
+            throw error;
+        }
     }
 }
 
@@ -134,7 +131,7 @@ class NotificationManager {
         setTimeout(() => {
             notification.style.animation = 'slideIn 0.3s ease reverse';
             setTimeout(() => notification.remove(), 300);
-        }, 3000);
+        }, 4000);
     }
 
     success(message) {
@@ -165,7 +162,6 @@ loginForm.addEventListener('submit', (e) => {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
-    // Простая проверка (в продакшене использовать серверную авторизацию)
     if (username === 'admin' && password === 'admin123') {
         sessionStorage.setItem('isLoggedIn', 'true');
         loginWrapper.style.display = 'none';
@@ -197,15 +193,12 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
 
         const section = item.getAttribute('data-section');
 
-        // Обновляем активный пункт меню
         document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
         item.classList.add('active');
 
-        // Показываем нужную секцию
         document.querySelectorAll('.admin-section').forEach(sec => sec.classList.remove('active'));
         document.getElementById(`${section}Section`).classList.add('active');
 
-        // Обновляем заголовок
         const titles = {
             'prices': 'Управление ценами',
             'portfolio': 'Управление портфолио'
@@ -215,14 +208,14 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
 });
 
 // Загрузка всех данных
-function loadAllData() {
-    loadPrices();
-    loadPortfolio();
+async function loadAllData() {
+    await loadPrices();
+    await loadPortfolio();
 }
 
 // Загрузка и обработка цен
-function loadPrices() {
-    const prices = dataManager.getPrices();
+async function loadPrices() {
+    const prices = await dataManager.getPrices();
 
     document.querySelectorAll('.price-form').forEach(form => {
         const priceId = form.getAttribute('data-price-id');
@@ -237,21 +230,25 @@ function loadPrices() {
 
 // Сохранение цен
 document.querySelectorAll('.price-form').forEach(form => {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const priceId = form.getAttribute('data-price-id');
         const price = parseInt(form.querySelector('[data-field="price"]').value);
         const duration = form.querySelector('[data-field="duration"]').value;
 
-        dataManager.updatePrice(priceId, { price, duration });
-        notificationManager.success('Цена успешно обновлена! Обновите главную страницу (F5) чтобы увидеть изменения.');
+        try {
+            await dataManager.updatePrice(priceId, { price, duration });
+            notificationManager.success('Цена успешно обновлена! Изменения применены на сайте.');
+        } catch (error) {
+            notificationManager.error('Ошибка при сохранении цены');
+        }
     });
 });
 
 // Загрузка портфолио
-function loadPortfolio() {
-    const portfolio = dataManager.getPortfolio();
+async function loadPortfolio() {
+    const portfolio = await dataManager.getPortfolio();
     const grid = document.getElementById('portfolioGrid');
 
     grid.innerHTML = '';
@@ -305,7 +302,6 @@ function createProjectCard(project) {
         </div>
     `;
 
-    // Обработчики кнопок
     card.querySelector('.btn-edit').addEventListener('click', () => editProject(project.id));
     card.querySelector('.btn-delete').addEventListener('click', () => deleteProject(project.id));
 
@@ -343,7 +339,7 @@ function closeModal() {
 }
 
 // Сохранение проекта
-projectForm.addEventListener('submit', (e) => {
+projectForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const projectData = {
@@ -355,21 +351,25 @@ projectForm.addEventListener('submit', (e) => {
         url: document.getElementById('projectUrl').value
     };
 
-    if (editingProjectId) {
-        dataManager.updateProject(editingProjectId, projectData);
-        notificationManager.success('Проект успешно обновлён! Обновите главную страницу (F5) чтобы увидеть изменения.');
-    } else {
-        dataManager.addProject(projectData);
-        notificationManager.success('Проект успешно добавлен! Обновите главную страницу (F5) чтобы увидеть изменения.');
-    }
+    try {
+        if (editingProjectId) {
+            await dataManager.updateProject(editingProjectId, projectData);
+            notificationManager.success('Проект успешно обновлён! Изменения применены на сайте.');
+        } else {
+            await dataManager.addProject(projectData);
+            notificationManager.success('Проект успешно добавлен! Изменения применены на сайте.');
+        }
 
-    loadPortfolio();
-    closeModal();
+        await loadPortfolio();
+        closeModal();
+    } catch (error) {
+        notificationManager.error('Ошибка при сохранении проекта');
+    }
 });
 
 // Редактирование проекта
-function editProject(id) {
-    const portfolio = dataManager.getPortfolio();
+async function editProject(id) {
+    const portfolio = await dataManager.getPortfolio();
     const project = portfolio.find(p => p.id === id);
 
     if (project) {
@@ -388,21 +388,29 @@ function editProject(id) {
 }
 
 // Удаление проекта
-function deleteProject(id) {
+async function deleteProject(id) {
     if (confirm('Вы уверены, что хотите удалить этот проект?')) {
-        dataManager.deleteProject(id);
-        loadPortfolio();
-        notificationManager.success('Проект успешно удалён! Обновите главную страницу (F5) чтобы увидеть изменения.');
+        try {
+            await dataManager.deleteProject(id);
+            await loadPortfolio();
+            notificationManager.success('Проект успешно удалён! Изменения применены на сайте.');
+        } catch (error) {
+            notificationManager.error('Ошибка при удалении проекта');
+        }
     }
 }
 
 // Сброс данных
-document.getElementById('resetBtn').addEventListener('click', () => {
+document.getElementById('resetBtn').addEventListener('click', async () => {
     if (confirm('Вы уверены, что хотите сбросить все данные к значениям по умолчанию?')) {
-        dataManager.resetToDefaults();
-        loadAllData();
-        notificationManager.info('Данные сброшены к значениям по умолчанию');
+        try {
+            await dataManager.resetToDefaults();
+            await loadAllData();
+            notificationManager.info('Данные сброшены к значениям по умолчанию');
+        } catch (error) {
+            notificationManager.error('Ошибка при сбросе данных');
+        }
     }
 });
 
-console.log('Admin panel initialized! 🔧');
+console.log('Admin panel with API initialized! 🔧');
