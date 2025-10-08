@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(del index.html styles.css script.js)"
+      "Bash(del index.html styles.css script.js)",
+      "Bash(node:*)",
+      "Bash(npm start)"
     ],
     "deny": [],
     "ask": []

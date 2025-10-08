@@ -388,9 +388,10 @@ function initOrderForm() {
             phone: document.getElementById('clientPhone').value,
             email: document.getElementById('clientEmail').value || '',
             clientType: document.getElementById('clientType').value,
+            projectType: document.getElementById('projectType').value,
             projectName: document.getElementById('projectName').value,
             description: document.getElementById('projectDescription').value,
-            telegram: document.getElementById('telegramContact').checked
+            contactMethod: document.getElementById('contactMethod').value
         };
 
         // Отправляем на сервер

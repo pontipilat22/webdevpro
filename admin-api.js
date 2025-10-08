@@ -195,20 +195,33 @@ const loginForm = document.getElementById('loginForm');
 const loginWrapper = document.getElementById('loginWrapper');
 const adminWrapper = document.getElementById('adminWrapper');
 
-loginForm.addEventListener('submit', (e) => {
+loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
-    if (username === 'admin' && password === 'admin123') {
-        sessionStorage.setItem('isLoggedIn', 'true');
-        loginWrapper.style.display = 'none';
-        adminWrapper.style.display = 'flex';
-        notificationManager.success('Успешный вход в систему!');
-        loadAllData();
-    } else {
-        notificationManager.error('Неверный логин или пароль!');
+    try {
+        const response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            sessionStorage.setItem('isLoggedIn', 'true');
+            loginWrapper.style.display = 'none';
+            adminWrapper.style.display = 'flex';
+            notificationManager.success('Успешный вход в систему!');
+            loadAllData();
+        } else {
+            notificationManager.error('Неверный логин или пароль!');
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        notificationManager.error('Ошибка при входе в систему!');
     }
 });
 
@@ -241,7 +254,8 @@ document.querySelectorAll('.nav-item[data-section]').forEach(item => {
         const titles = {
             'prices': 'Управление ценами',
             'portfolio': 'Управление портфолио',
-            'orders': 'Заявки клиентов'
+            'orders': 'Заявки клиентов',
+            'settings': 'Настройки'
         };
         document.getElementById('sectionTitle').textContent = titles[section];
     });
@@ -454,6 +468,50 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
     }
 });
 
+// Смена пароля
+const changePasswordForm = document.getElementById('changePasswordForm');
+if (changePasswordForm) {
+    changePasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        // Проверка совпадения нового пароля
+        if (newPassword !== confirmPassword) {
+            notificationManager.error('Новый пароль и подтверждение не совпадают!');
+            return;
+        }
+
+        // Проверка длины пароля
+        if (newPassword.length < 6) {
+            notificationManager.error('Пароль должен содержать минимум 6 символов!');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/auth/change-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                notificationManager.success('Пароль успешно изменён!');
+                changePasswordForm.reset();
+            } else {
+                notificationManager.error(result.error || 'Ошибка при смене пароля');
+            }
+        } catch (error) {
+            console.error('Password change error:', error);
+            notificationManager.error('Ошибка при смене пароля');
+        }
+    });
+}
+
 // Загрузка заявок
 async function loadOrders() {
     const orders = await dataManager.getOrders();
@@ -502,6 +560,21 @@ function createOrderCard(order) {
     const statusBadge = getStatusBadge(order.status);
     const clientTypeBadge = order.clientType === 'company' ? 'Компания' : 'Физ. лицо';
 
+    const projectTypes = {
+        'landing': 'Лендинг',
+        'corporate': 'Корпоративный сайт',
+        'ecommerce': 'Интернет-магазин'
+    };
+    const projectTypeName = projectTypes[order.projectType] || order.projectType;
+
+    const contactMethods = {
+        'whatsapp': 'WhatsApp',
+        'telegram': 'Telegram',
+        'email': 'E-mail',
+        'instagram': 'Instagram'
+    };
+    const contactMethodName = contactMethods[order.contactMethod] || order.contactMethod;
+
     card.innerHTML = `
         <div class="order-card-header">
             <div class="order-card-title">
@@ -534,14 +607,19 @@ function createOrderCard(order) {
                     </svg>
                     <span>${clientTypeBadge}</span>
                 </div>
-                ${order.telegram ? `
+                <div class="order-info-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                    </svg>
+                    <span>${projectTypeName}</span>
+                </div>
                 <div class="order-info-item">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
                     </svg>
-                    <span>Связаться в Telegram</span>
+                    <span>Связь: ${contactMethodName}</span>
                 </div>
-                ` : ''}
             </div>
             <div class="order-project">
                 <strong>Проект:</strong> ${order.projectName}

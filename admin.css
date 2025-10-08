@@ -649,6 +649,49 @@
     max-width: 400px;
 }
 
+/* Секция настроек */
+.settings-container {
+    max-width: 900px;
+}
+
+.security-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: var(--transition);
+}
+
+.info-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(99, 102, 241, 0.2);
+}
+
+.info-item svg {
+    flex-shrink: 0;
+    color: var(--color-primary);
+}
+
+.info-item h4 {
+    font-size: 1rem;
+    margin-bottom: 6px;
+    color: var(--color-text);
+}
+
+.info-item p {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
 /* Адаптивность */
 @media (max-width: 968px) {
     .admin-sidebar {

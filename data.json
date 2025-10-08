@@ -1,5 +1,9 @@
 {
-  "orders": [],
+  "admin": {
+    "username": "admin",
+    "passwordHash": "29f191d10583adc4b59e58338af24bfdeeae945a46262920391ac05caa6707298cd5ee2473d3ab5a854a4944375dca5fb3975bfba0bdd01898cc82fb0e6b2ae6",
+    "passwordSalt": "641b3991e58a8d60715b9547ae46d41c"
+  },
   "prices": {
     "landing": {
       "price": 50000,

@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,9 +15,30 @@ app.use(express.static(__dirname));
 // Путь к файлу данных
 const DATA_FILE = path.join(__dirname, 'data.json');
 
+// Функции для работы с паролями
+function hashPassword(password, salt = null) {
+    if (!salt) {
+        salt = crypto.randomBytes(16).toString('hex');
+    }
+    const hash = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha256').toString('hex');
+    return { hash, salt };
+}
+
+function verifyPassword(password, hash, salt) {
+    const { hash: newHash } = hashPassword(password, salt);
+    return hash === newHash;
+}
+
 // Инициализация данных по умолчанию
 function initializeData() {
+    const defaultPassword = hashPassword('admin123');
+
     const defaultData = {
+        admin: {
+            username: 'admin',
+            passwordHash: defaultPassword.hash,
+            passwordSalt: defaultPassword.salt
+        },
         prices: {
             landing: { price: 50000, duration: '5-7 дней' },
             corporate: { price: 150000, duration: '14-21 день' },
@@ -201,6 +223,59 @@ app.post('/api/reset', (req, res) => {
     } catch (error) {
         console.error('Error resetting data:', error);
         res.status(500).json({ error: 'Failed to reset data' });
+    }
+});
+
+// Аутентификация
+app.post('/api/auth/login', (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+
+        if (!data.admin) {
+            return res.status(500).json({ error: 'Admin user not configured' });
+        }
+
+        if (username === data.admin.username) {
+            const isValid = verifyPassword(password, data.admin.passwordHash, data.admin.passwordSalt);
+            if (isValid) {
+                return res.json({ success: true, message: 'Login successful' });
+            }
+        }
+
+        res.status(401).json({ success: false, error: 'Invalid credentials' });
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).json({ error: 'Login failed' });
+    }
+});
+
+// Смена пароля
+app.post('/api/auth/change-password', (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+
+        if (!data.admin) {
+            return res.status(500).json({ error: 'Admin user not configured' });
+        }
+
+        // Проверяем текущий пароль
+        const isValid = verifyPassword(currentPassword, data.admin.passwordHash, data.admin.passwordSalt);
+        if (!isValid) {
+            return res.status(401).json({ success: false, error: 'Current password is incorrect' });
+        }
+
+        // Устанавливаем новый пароль
+        const newPasswordData = hashPassword(newPassword);
+        data.admin.passwordHash = newPasswordData.hash;
+        data.admin.passwordSalt = newPasswordData.salt;
+
+        fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+        res.json({ success: true, message: 'Password changed successfully' });
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).json({ error: 'Failed to change password' });
     }
 });
 
